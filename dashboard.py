@@ -2,8 +2,6 @@ import streamlit as st
 import pandas as pd
 import altair as alt
 
-st.title("edited")
-
 st.set_page_config(page_title="College Info Dashboard", layout="wide")
 st.title("College Information Dashboard")
 alt.themes.enable("dark")
