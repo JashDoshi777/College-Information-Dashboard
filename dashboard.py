@@ -3,8 +3,6 @@ import pandas as pd
 import altair as alt
 
 
-st.title("edited")
-
 st.set_page_config(page_title="College Info Dashboard", layout="wide")
 st.title("College Information Dashboard")
 alt.themes.enable("dark")
@@ -101,6 +99,12 @@ if selected_university != "ALL":
     st.dataframe(df[['College Name', 'College Type', 'College Types',
                      'Exclusively in Womens Colleges', 'Email', 'Mobile', 'Principal Name']],
                  use_container_width=True)
+
+    
+
+    
+
+
 
     
 
