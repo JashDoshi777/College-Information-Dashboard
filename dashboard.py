@@ -1,20 +1,29 @@
 import streamlit as st
 import pandas as pd
 import altair as alt
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
+# Page setup
 st.set_page_config(page_title="College Info Dashboard", layout="wide")
 st.title("College Information Dashboard")
 alt.themes.enable("dark")
 
+# --- Load data from Google Sheets instead of CSV ---
+scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+creds = ServiceAccountCredentials.from_json_keyfile_name("streamlit-466306-8c69aef6b887.json", scope)
+client = gspread.authorize(creds)
+sheet = client.open("dashboard_data").sheet1  # Replace with your Google Sheet name
+data = sheet.get_all_records()
+df = pd.DataFrame(data)
+# ----------------------------------------------------
 
-df = pd.read_csv("colleges.csv")
-
-
+# Clean column names
 df.columns = df.columns.str.strip()
 df.columns = df.columns.str.replace('\u00a0', '', regex=True)
 df.columns = df.columns.str.encode('ascii', 'ignore').str.decode('ascii')
 
-
+# Sidebar filters
 with st.sidebar:
     st.header("Filters")
     districts = sorted(df['District'].dropna().unique())
@@ -32,15 +41,15 @@ with st.sidebar:
     if selected_university != "ALL":
         df = df[df['University Name'] == selected_university]
 
-
+# Top metrics
 with st.container():
-    col1, col2, col3 ,col4 = st.columns(4)
+    col1, col2, col3, col4 = st.columns(4)
     col1.metric("Total Colleges", df['College Name'].nunique())
     col2.metric("Universities", df['University Name'].nunique())
     col3.metric("Talukas", df['Taluka'].nunique())
     col4.metric("Districts", df['District'].nunique())
 
-
+# Charts
 with st.container():
     col1, col2 = st.columns(2)
 
@@ -65,7 +74,6 @@ with st.container():
             tooltip=['College Types', 'Count']
         ).properties(height=250)
         st.altair_chart(chart2, use_container_width=True)
-
 
 with st.container():
     col1, col2 = st.columns(2)
@@ -92,7 +100,7 @@ with st.container():
         ).properties(height=300)
         st.altair_chart(chart3, use_container_width=True)
 
-
+# Display table for selected university
 if selected_university != "ALL":
     st.markdown(f"### Colleges under **{selected_university}**")
     st.dataframe(df[['College Name', 'College Type', 'College Types',
